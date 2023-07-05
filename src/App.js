@@ -24,10 +24,12 @@ export default function App() {
 
   return (
     <div className='container'>
+      <hr />
       {todos.map(item => (
         <div key={item.id} style={{paddingLeft: '1%'}}>
-          <h1>{item.title}</h1>
-          <span>{item.body}</span>
+          <h4>{item.title}</h4>
+          <p>{item.body}</p>
+          <hr />
         </div>
       ))}
     </div>        

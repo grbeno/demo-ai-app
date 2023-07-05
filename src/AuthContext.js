@@ -37,7 +37,7 @@ export const AuthProvider = ({children}) => {
             axiosInstance.defaults.headers['Authorization'] =
                 'JWT ' + localStorage.getItem('access_token');
             console.log(response);
-            window.location.href = '/';
+            // window.location.href = '/';
         }).catch((error) => {
             console.log(error);
         });

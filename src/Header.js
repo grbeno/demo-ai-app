@@ -12,7 +12,7 @@ const Header = () => {
     return(
         <header>
             <nav className="navbar navbar-expand-md m-0 border-bottom shadow-sm">
-                <a className="menu-link navbar-brand mr-auto px-4 text-success" href="/"><span data-toggle="tooltip" title="home"><i class="fa-solid fa-kiwi-bird fa-2x"></i></span></a>
+                <a className="menu-link navbar-brand mr-auto px-4 text-success" href="/"><span data-toggle="tooltip" title="home"><i className="fa-solid fa-kiwi-bird fa-2x"></i></span></a>
                 <>
                 {user ? (
                     <a className="h5 m-4 text-light d-block" onClick={logout}><span data-toggle="tooltip" title="logout"><i className="fa-solid fa-power-off fa-2x"></i></span></a>
