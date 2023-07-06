@@ -6,15 +6,16 @@ import AuthContext from './AuthContext';
 
 const Header = () => {
 
-    const {logout} = useContext(AuthContext)
-    const user = localStorage.getItem('access_token');
+    const {logout, isAccessTokenExpired} = useContext(AuthContext)
+    //const token = isAccessTokenExpired ? null : localStorage.getItem('access_token');
+    const token = localStorage.getItem('access_token');
     
     return(
         <header>
             <nav className="navbar navbar-expand-md m-0 border-bottom shadow-sm">
-                <a className="menu-link navbar-brand mr-auto px-4 text-success" href="/"><span data-toggle="tooltip" title="home"><i className="fa-solid fa-kiwi-bird fa-2x"></i></span></a>
+                <a className="menu-link navbar-brand mr-auto px-4 text-success" href='/'><span data-toggle="tooltip" title="home"><i className="fa-solid fa-kiwi-bird fa-2x"></i></span></a>
                 <>
-                {user ? (
+                {token ? (
                     <a className="h5 m-4 text-light d-block" onClick={logout}><span data-toggle="tooltip" title="logout"><i className="fa-solid fa-power-off fa-2x"></i></span></a>
                 ) : (
                     <div>

@@ -1,33 +1,18 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext } from 'react';
 import './App.css';
 import axiosInstance from './axios';
+import jwt_decode from "jwt-decode";
 
 const AuthContext = createContext();
 export default AuthContext;
 
 export const AuthProvider = ({children}) => {
 
-// export default function Login() {
-  
-    /* const [formData, setFormData] = useState({
-        username: '',
-        password: '' 
-    });
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value.trim(),
-        });
-    }; */
-
     // login
     const login = (e) => {
         e.preventDefault();
         
         axiosInstance.post('/api/token/', {
-            // username: formData.username,
-            // password: formData.password
             username: e.target.username.value,
             password: e.target.password.value 
         })
@@ -36,8 +21,9 @@ export const AuthProvider = ({children}) => {
             localStorage.setItem('refresh_token', response.data.refresh);
             axiosInstance.defaults.headers['Authorization'] =
                 'JWT ' + localStorage.getItem('access_token');
-            console.log(response);
-            // window.location.href = '/';
+            // console.log(response);
+            // window.location.reload();  // localhost:3000
+            window.location.href = '/';  // localhost:8000
         }).catch((error) => {
             console.log(error);
         });
@@ -51,19 +37,31 @@ export const AuthProvider = ({children}) => {
         window.location.reload();
     };
 
+    // check if access token is expired
+    const isAccessTokenExpired = () => {
+        
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const decodedToken = jwt_decode(token);
+            const currentTime = Date.now() / 1000; // Convert to seconds
+            if (decodedToken.exp < currentTime) {
+                logout();
+                return true;
+            }; // Compare expiration time
+        } catch (error) {
+          console.error('Error decoding access token:', error);
+          return true;
+        }
+    }
+
+    const contextData = {login, logout, isAccessTokenExpired};
+      
     return (
         <>
-            {/* <div className="container">
-                <form onSubmit={login}>
-                    <input type="text" name="username" onChange={handleChange}/>
-                    <input type="password" name="password" onChange={handleChange}/>
-                    <input type="submit" value="Login" />
-                </form>
-                <button onClick={logout}>Logout</button>
-            </div>  */}
-            <AuthContext.Provider value={{login, logout}}>
-                {children}
-            </AuthContext.Provider>
+        <AuthContext.Provider value={contextData}>
+            {children}
+        </AuthContext.Provider>
         </>
     );
 }

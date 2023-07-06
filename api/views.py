@@ -25,8 +25,18 @@ class ListTodo(generics.ListAPIView):
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
 
-        
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        token['username'] = user.username
+        # ...
+
+        return token
 
 # Custom TokenObtainPairView
 class MyTokenObtainPairView(TokenObtainPairView):
-	serializer_class = TokenObtainPairSerializer
+	serializer_class = MyTokenObtainPairSerializer
