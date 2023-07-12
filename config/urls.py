@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from api.views import MyTokenObtainPairView
+from api.views import MyTokenObtainPairView, LogoutView
 
 
 urlpatterns = [
@@ -19,5 +19,6 @@ urlpatterns = [
     # JWT tokens
     path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/blacklist/', LogoutView.as_view(), name='blacklist'),
     
 ]

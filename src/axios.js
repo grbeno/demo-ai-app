@@ -1,4 +1,5 @@
 import axios from 'axios';
+import jwt_decode from "jwt-decode";
 
 
 const baseURL = 'http://localhost:8000';
@@ -15,52 +16,103 @@ const axiosInstance = axios.create({
 	}, 
 });
 
+// current time
+const currentTime = Date.now() / 1000;
+
+// expiration time of token
+const expirationTime = (token) => {
+    return localStorage.getItem(token) ? jwt_decode(localStorage.getItem(token)).exp : currentTime;
+}
+
+// token flags
+const tokenFlags = {
+    isRefreshing: false,
+    refreshFailed: false,
+};
+
+ // logout
+ const logout = () => {
+    // blacklist token
+    axiosInstance.post('/api/token/blacklist/', {
+        "refresh_token": localStorage.getItem('refresh_token')
+    })
+    .then((response) => {
+        console.log(response);
+        // remove tokens
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        delete axiosInstance.defaults.headers['Authorization'];
+        // window.location.reload();  // for hiding logs from the browser
+    }).catch((error) => {
+        console.log(error);
+    });
+};
+
 // refresh token
-/* axiosInstance.interceptors.response.use(
+axiosInstance.interceptors.response.use(
     response => response,
     error => {
         const originalRequest = error.config;
+        
+        // console.log(originalRequest.url);
 
         // Prevent infinite loops
-        if (error.response.status === 401 && originalRequest.url === baseURL+'api/token/refresh/') {
-            window.location.href = '/';
+        if (error.response.status === 401 && originalRequest.url === baseURL + '/api/token/refresh/') {
+            console.log('error 401');
             return Promise.reject(error);
         }
 
         if (error.response.data.code === "token_not_valid" && error.response.status === 401 && error.response.statusText === "Unauthorized") {
-            const refreshToken = localStorage.getItem('refresh_token');
+            
+            const refreshToken = localStorage.getItem('refresh_token') ? localStorage.getItem('refresh_token') : null;
 
             if (refreshToken) {
-                const tokenParts = refreshToken.split(' ');
-                const header = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                };
+
                 const body = {
-                    refresh: tokenParts[1]
+                    refresh: refreshToken
                 };
+                
+                if (!tokenFlags.isRefreshing && !tokenFlags.refreshFailed) {
+                    tokenFlags.isRefreshing = true;
 
-                return axiosInstance.post('/api/token/refresh/', header, body)
-                .then((response) => {
-                    localStorage.setItem('access_token', response.data.access);
-                    localStorage.setItem('refresh_token', response.data.refresh);
+                    console.log('Access token expired. Attempting to refresh token ...');
+                    console.log('access_token_expired_@: ' + expirationTime('access_token'));
+                    
+                    return axiosInstance.post('/api/token/refresh/', body)
+                    .then((response) => {
+                        localStorage.setItem('access_token', response.data.access);
+                        localStorage.setItem('refresh_token', response.data.refresh);
 
-                    axiosInstance.defaults.headers['Authorization'] = 
-                        'JWT ' + response.data.access;
-                    originalRequest.headers['Authorization'] = 
-                        'JWT ' + response.data.access;
+                        axiosInstance.defaults.headers['Authorization'] = 
+                            'JWT ' + response.data.access;
+                        originalRequest.headers['Authorization'] = 
+                            'JWT ' + response.data.access;
 
-                    return axiosInstance(originalRequest);
-                })
-                .catch(err => {
-                    console.log(err);
-                });
+                        tokenFlags.isRefreshing = false;
+                        
+                        console.log('refreshToken activated!');
+                        window.location.reload();  // RELOAD when token is refreshed
+                        
+                        return axiosInstance(originalRequest);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        tokenFlags.refreshFailed = true;
+                    });
+                }
+                else {
+                    console.log("Refresh token expired.");
+                    console.log('refresh_token_expired_@: ' + expirationTime('refresh_token'));
+                    logout();
+                }            
             }
             else {
                 console.log("Refresh token not available.");
-                window.location.href = '/';
             }
+        } 
+        else {
+            return Promise.reject(error);
         }
-}); */
+});
 
 export default axiosInstance;

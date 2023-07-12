@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import React, { createContext, useEffect } from 'react';
 import './App.css';
 import axiosInstance from './axios';
 import jwt_decode from "jwt-decode";
@@ -31,10 +31,20 @@ export const AuthProvider = ({children}) => {
 
     // logout
     const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        axiosInstance.defaults.headers['Authorization'] = null;
-        window.location.reload();
+        // blacklist token
+        axiosInstance.post('/api/token/blacklist/', {
+            "refresh_token": localStorage.getItem('refresh_token')
+        })
+        .then((response) => {
+            console.log(response);
+             // remove tokens
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            delete axiosInstance.defaults.headers['Authorization'];
+            window.location.reload();
+        }).catch((error) => {
+            console.log(error);
+        });
     };
 
     // check if access token is expired
@@ -54,6 +64,11 @@ export const AuthProvider = ({children}) => {
           return true;
         }
     }
+
+    // check if access token is expired on component mount
+    /* useEffect(() => {
+        isAccessTokenExpired();
+    }, []); */
 
     const contextData = {login, logout, isAccessTokenExpired};
       
