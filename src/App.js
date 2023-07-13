@@ -8,7 +8,6 @@ export default function App() {
   // token and user
   const token = localStorage.getItem('access_token');
   const user = token ? jwt_decode(token) : 0;
-  const currentTime = Date.now() / 1000;  // Convert to seconds
 
   // states
   const [todos, setTodos] = useState([]);
@@ -30,7 +29,7 @@ export default function App() {
 
   return (
     <>
-    {user.exp > currentTime ? (
+    {token ? (
       <div className='container p-4'>
         <h4 className="text-secondary">The todos below are created by user: <span className="text-success">{user.username}</span></h4>
         <hr />

@@ -1,7 +1,7 @@
-import React, { createContext, useEffect } from 'react';
+import React, { createContext } from 'react';
 import './App.css';
 import axiosInstance from './axios';
-import jwt_decode from "jwt-decode";
+
 
 const AuthContext = createContext();
 export default AuthContext;
@@ -9,7 +9,7 @@ export default AuthContext;
 export const AuthProvider = ({children}) => {
 
     // login
-    const login = (e) => {
+    const login = (e, errorCallback) => {
         e.preventDefault();
         
         axiosInstance.post('/api/token/', {
@@ -21,11 +21,11 @@ export const AuthProvider = ({children}) => {
             localStorage.setItem('refresh_token', response.data.refresh);
             axiosInstance.defaults.headers['Authorization'] =
                 'JWT ' + localStorage.getItem('access_token');
-            // console.log(response);
             // window.location.reload();  // localhost:3000
-            window.location.href = '/';  // localhost:8000
+            window.location.href = '/';   // localhost:8000
         }).catch((error) => {
-            console.log(error);
+            errorCallback("Wrong username or password! Try again.");
+            console.log('Possibly wrong username or password: ' + error);
         });
     };
 
@@ -37,7 +37,7 @@ export const AuthProvider = ({children}) => {
         })
         .then((response) => {
             console.log(response);
-             // remove tokens
+            // remove tokens
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             delete axiosInstance.defaults.headers['Authorization'];
@@ -47,30 +47,7 @@ export const AuthProvider = ({children}) => {
         });
     };
 
-    // check if access token is expired
-    const isAccessTokenExpired = () => {
-        
-        const token = localStorage.getItem('access_token');
-        
-        try {
-            const decodedToken = jwt_decode(token);
-            const currentTime = Date.now() / 1000; // Convert to seconds
-            if (decodedToken.exp < currentTime) {
-                logout();
-                return true;
-            }; // Compare expiration time
-        } catch (error) {
-          console.error('Error decoding access token:', error);
-          return true;
-        }
-    }
-
-    // check if access token is expired on component mount
-    /* useEffect(() => {
-        isAccessTokenExpired();
-    }, []); */
-
-    const contextData = {login, logout, isAccessTokenExpired};
+    const contextData = {login, logout};
       
     return (
         <>

@@ -42,7 +42,7 @@ const tokenFlags = {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         delete axiosInstance.defaults.headers['Authorization'];
-        // window.location.reload();  // for hiding logs from the browser
+        window.location.reload();  // hiding logs from the browser
     }).catch((error) => {
         console.log(error);
     });
@@ -53,8 +53,6 @@ axiosInstance.interceptors.response.use(
     response => response,
     error => {
         const originalRequest = error.config;
-        
-        // console.log(originalRequest.url);
 
         // Prevent infinite loops
         if (error.response.status === 401 && originalRequest.url === baseURL + '/api/token/refresh/') {
@@ -81,7 +79,7 @@ axiosInstance.interceptors.response.use(
                     return axiosInstance.post('/api/token/refresh/', body)
                     .then((response) => {
                         localStorage.setItem('access_token', response.data.access);
-                        localStorage.setItem('refresh_token', response.data.refresh);
+                        localStorage.setItem('refresh_token', response.data.refresh);  // renew refresh token - authenticated while the user is active!
 
                         axiosInstance.defaults.headers['Authorization'] = 
                             'JWT ' + response.data.access;
@@ -89,9 +87,7 @@ axiosInstance.interceptors.response.use(
                             'JWT ' + response.data.access;
 
                         tokenFlags.isRefreshing = false;
-                        
                         console.log('refreshToken activated!');
-                        window.location.reload();  // RELOAD when token is refreshed
                         
                         return axiosInstance(originalRequest);
                     })
