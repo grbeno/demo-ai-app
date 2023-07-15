@@ -1,5 +1,5 @@
 import axios from 'axios';
-import jwt_decode from "jwt-decode";
+import { expirationTime } from './utils';
 
 
 const baseURL = 'http://localhost:8000';
@@ -15,14 +15,6 @@ const axiosInstance = axios.create({
 		'Accept': 'application/json',
 	}, 
 });
-
-// current time
-const currentTime = Date.now() / 1000;
-
-// expiration time of token
-const expirationTime = (token) => {
-    return localStorage.getItem(token) ? jwt_decode(localStorage.getItem(token)).exp : currentTime;
-}
 
 // token flags
 const tokenFlags = {
