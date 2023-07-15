@@ -30,22 +30,12 @@ const tokenFlags = {
     refreshFailed: false,
 };
 
- // logout
- const logout = () => {
-    // blacklist token
-    axiosInstance.post('/api/token/blacklist/', {
-        "refresh_token": localStorage.getItem('refresh_token')
-    })
-    .then((response) => {
-        console.log(response);
-        // remove tokens
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        delete axiosInstance.defaults.headers['Authorization'];
-        window.location.reload();  // hiding logs from the browser
-    }).catch((error) => {
-        console.log(error);
-    });
+ // remove tokens
+ const removeTokens = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    delete axiosInstance.defaults.headers['Authorization'];
+    window.location.reload();
 };
 
 // refresh token
@@ -69,7 +59,7 @@ axiosInstance.interceptors.response.use(
                 const body = {
                     refresh: refreshToken
                 };
-                
+
                 if (!tokenFlags.isRefreshing && !tokenFlags.refreshFailed) {
                     tokenFlags.isRefreshing = true;
 
@@ -99,8 +89,8 @@ axiosInstance.interceptors.response.use(
                 else {
                     console.log("Refresh token expired.");
                     console.log('refresh_token_expired_@: ' + expirationTime('refresh_token'));
-                    logout();
-                }            
+                    removeTokens();
+                }
             }
             else {
                 console.log("Refresh token not available.");

@@ -46,6 +46,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 # Logout & Blacklist Token
 class LogoutView(generics.GenericAPIView):
+    
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
@@ -58,6 +59,5 @@ class LogoutView(generics.GenericAPIView):
             except Exception as e:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         else:
-            print('Refresh token is missing.')
             return Response({'detail': 'Refresh token is missing.'}, status=status.HTTP_400_BAD_REQUEST)
         

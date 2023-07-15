@@ -9,7 +9,6 @@ const Login = () => {
 
     const handleLogin = (e) => {
         e.preventDefault();
-
         login(e, (errorMessage) => {
             setError(errorMessage);
         });
